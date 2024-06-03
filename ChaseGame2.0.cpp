@@ -77,6 +77,7 @@ public:
     // Метод для запуска игры
     void startGame();
 };
+
 // Реализация класса Prey, наследующего от Character
 class Prey : public Character {
 public:
@@ -145,13 +146,41 @@ public:
         default:
             std::cout << "Invalid input" << std::endl;
         }
-        //Условия краёв поля
+        //Условия краёв поля(В данном случае Prey н может ходить через стены)
         if (position.x < 0) position.x = Arena::getWidth() - 1;
         if (position.y < 0) position.y = Arena::getHeight() - 1; 
         if (position.x >= Arena::getWidth()) position.x = 0;
         if (position.y >= Arena::getHeight()) position.y = 0;
     }
+  //Метод реализации поведения жертвы, когда выбран хищник 
+    void moveForPredator() {
+        int predX = Arena::getInstance().getPredatorPosition().x; //Получаем координату Pred по x
+        int predY = Arena::getInstance().getPredatorPosition().y; //Получаем координату Pred по y
+        int preyX = position.getX(); //Получаем координату Prey по x
+        int preyY = position.getY(); //Получаем координату Prey по y
 
+        //Высчитываем разницу в координатах
+        int dx = abs(predX - preyX); 
+        int dy = abs(predY - preyY);
+        
+        
+        if (dx > dy) {
+            //Проверяем в какую стороную лучше всего сходить и присваеваем к позиции
+            int moveDirection = (preyX < predX) ? 1 : ((preyX > predX) ? -1 : 0);
+            position = Point2D(preyX - moveDirection, preyY);
+        }
+        else {
+            int moveDirection = (preyY < predY) ? 1 : ((preyY > predY) ? -1 : 0);
+            position = Point2D(preyX, preyY - moveDirection);
+        }
+        //Условия краёв поля(В данном случае Prey не может ходить через стены,
+        // т.к. имбалансная особенность, с которой нельзя выиграть за Predator)
+        if (position.x < 0) position.x = 0;
+        if (position.y < 0) position.y = 0;
+        if (position.x >= Arena::getWidth()) position.x = Arena::getWidth() - 1;
+        if (position.y >= Arena::getHeight()) position.y = Arena::getWidth() - 1;
+    }
+};
 
 class Predator : public Character {
 public:
@@ -223,6 +252,31 @@ public:
         if (position.x >= Arena::getWidth()) position.x = Arena::getWidth() - 1;
         if (position.y >= Arena::getHeight()) position.y = Arena::getHeight() - 1;
     }
+    //Тот же самый метод для Pred
+    void moveForPrey() {
+
+        int predX = position.getX();
+        int predY = position.getY();
+        int preyX = Arena::getInstance().getPreyPosition().getX();
+        int preyY = Arena::getInstance().getPreyPosition().getY();
+
+        int dx = abs(predX - preyX);
+        int dy = abs(predY - preyY);
+        //Только добавляем рандомное увелечение хода в position = Point2D(predX + moveDirection * distance, predY);
+        int distance = rand() % 3 + 1;
+
+        if (dx > dy) {
+            int moveDirection = (predX < preyX) ? 1 : ((predX > preyX) ? -1 : 0);
+            position = Point2D(predX + moveDirection * distance, predY);
+        }
+        else {
+            int moveDirection = (predY < preyY) ? 1 : ((predY > preyY) ? -1 : 0);
+            position = Point2D(predX, predY + moveDirection * distance);
+
+        }
+    }
+};
+
 // Инициализация статической переменной для реализации шаблона Singleton
 Arena* Arena::instance = nullptr;
 
@@ -272,9 +326,11 @@ void Arena::startGame() {
 
         if (playerType == PlayerType::PREY) {
             prey.move(_getch());
+            predator.moveForPrey();
         }
         else if (playerType == PlayerType::PREDATOR) {
-            predator.move(_getch());;
+            predator.move(_getch());
+            prey.moveForPredator();
         }
 
         preyPosition = prey.getPosition();
