@@ -145,3 +145,81 @@ public:
         default:
             std::cout << "Invalid input" << std::endl;
         }
+        //Условия краёв поля
+        if (position.x < 0) position.x = Arena::getWidth() - 1;
+        if (position.y < 0) position.y = Arena::getHeight() - 1; 
+        if (position.x >= Arena::getWidth()) position.x = 0;
+        if (position.y >= Arena::getHeight()) position.y = 0;
+    }
+
+
+class Predator : public Character {
+public:
+    Predator(int x, int y) : Character(x, y) {}
+
+    void move(char key) override {
+        switch (key) {
+        case 'w':
+            position.y -= 1 + (rand() % 3);
+            break;
+        case 'W':
+            position.y -= 1 + (rand() % 3);
+            break;
+        case 's':
+            position.y += 1 + (rand() % 3);
+            break;
+        case 'S':
+            position.y += 1 + (rand() % 3);
+            break;
+        case 'a':
+            position.x -= 1 + (rand() % 3);
+            break;
+        case 'A':
+            position.x -= 1 + (rand() % 3);
+            break;
+        case 'd':
+            position.x += 1 + (rand() % 3);
+            break;
+        case 'D':
+            position.x += 1 + (rand() % 3);
+            break;
+        case 'q':
+            position.x -= 1;
+            position.y -= 1;
+            break;
+        case 'Q':
+            position.x -= 1;
+            position.y -= 1;
+            break;
+        case 'e':
+            position.x += 1;
+            position.y -= 1;
+            break;
+        case 'E':
+            position.x += 1;
+            position.y -= 1;
+            break;
+        case 'z':
+            position.x -= 1;
+            position.y += 1;
+            break;
+        case 'Z':
+            position.x -= 1;
+            position.y += 1;
+            break;
+        case 'c':
+            position.x += 1;
+            position.y += 1;
+            break;
+        case 'C':
+            position.x += 1;
+            position.y += 1;
+            break;
+        default:
+            std::cout << "Wrong button" << std::endl;
+        }
+        if (position.x < 0) position.x = 0;
+        if (position.y < 0) position.y = 0;
+        if (position.x >= Arena::getWidth()) position.x = Arena::getWidth() - 1;
+        if (position.y >= Arena::getHeight()) position.y = Arena::getHeight() - 1;
+    }
