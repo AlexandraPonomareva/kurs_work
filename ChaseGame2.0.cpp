@@ -223,3 +223,88 @@ public:
         if (position.x >= Arena::getWidth()) position.x = Arena::getWidth() - 1;
         if (position.y >= Arena::getHeight()) position.y = Arena::getHeight() - 1;
     }
+// Инициализация статической переменной для реализации шаблона Singleton
+Arena* Arena::instance = nullptr;
+
+
+void Arena::startGame() {
+    srand(time(nullptr));
+    int movesLeft = MOVES_LIMIT;
+
+    while (movesLeft > 0) {
+        system("cls"); //Для коректного отображения поля
+        std::cout << "+ ";
+        for (int i = 0; i < WIDTH; ++i) {
+            std::cout << "- ";
+        }
+        std::cout << "+" << std::endl;
+        for (int y = 0; y < HEIGHT; ++y) {
+            std::cout << "|";
+            for (int x = 0; x < WIDTH; ++x) {
+                if (x == preyPosition.x && y == preyPosition.y)
+                    std::cout << "$ ";
+                else if (x == predPosition.x && y == predPosition.y)
+                    std::cout << "@ ";
+                // Проверяем, достигли ли мы правой границы поля
+                // else if (x == WIDTH - 1 || x == 0)
+                //     std::cout << "|";
+                else if (y == HEIGHT / 2) {
+                    // Выводим центральную линию
+                    std::cout << ". ";
+                }
+                else {
+                    // Выводим пустые места для вертикальных линий центра
+                    std::cout << "  ";
+                }
+            }
+            std::cout << "|" << std::endl;
+        }
+
+        // Выводим нижнюю границу поля
+        std::cout << "+";
+        for (int i = 0; i < WIDTH; ++i) {
+            std::cout << "- ";
+        }
+        std::cout << "+" << std::endl;
+
+        Prey prey(preyPosition.x, preyPosition.y);
+        Predator predator(predPosition.x, predPosition.y);
+
+        if (playerType == PlayerType::PREY) {
+            prey.move(_getch());
+        }
+        else if (playerType == PlayerType::PREDATOR) {
+            predator.move(_getch());;
+        }
+
+        preyPosition = prey.getPosition();
+        predPosition = predator.getPosition();
+
+        if (abs(preyPosition.x - predPosition.x) <= 1 &&
+            abs(preyPosition.y - predPosition.y) <= 1) {
+            std::cout << "Game over You got caught!" << std::endl;
+            break;
+        }
+
+        _getch();
+        --movesLeft;
+    }
+
+    if (movesLeft == 0) {
+        std::cout << "Game over The moves are over." << std::endl;
+    }
+}
+
+int main() {
+    PlayerType choose;
+    int ch;
+    std::cout << "Choose hero: \n 1. Predator \n 2. Prey" << std::endl;
+    std::cin >> ch;
+    if (ch == 1)
+        choose = PlayerType::PREDATOR;
+    else if (ch == 2)
+        choose = PlayerType::PREY;
+    Arena::getInstance().setPlayerType(choose);
+    Arena::getInstance().startGame();
+    return 0;
+}
